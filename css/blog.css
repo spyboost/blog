@@ -1,0 +1,35 @@
+code.bash:before{
+  content: '$';
+}
+.os-windows code.bash:before{
+  content: '>';
+}
+.path-separator:before{
+  content: '/';
+}
+.os-windows .path-separator:before{
+  content: '\\';
+}
+i[class*=icon-expand-alt], i[class*=icon-collapse-alt]{
+  margin-right: 5pt;
+}
+code, .console-output, .file .content{
+  padding: 5pt;
+  border: 1px dashed;
+  display: block;
+}
+code.bash, .console-output{
+  background: #000000;
+  color: white;
+}
+.file code {
+  padding: 0;
+  border: none;
+}
+.file .name{
+  display: inline-block;
+  padding: 5pt;
+  border-bottom: none;
+  background: rgb(83, 128, 177);
+  color: white;
+}
