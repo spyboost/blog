@@ -4,7 +4,6 @@ window.addEventListener('load', function(){
   $('.file .name').prepend('<i class="icon-collapse-alt"></i>');
   var clickElements = document.querySelectorAll('.file i[class^=icon]');
   function clickElementClickHandler(){
-    console.log(arguments, this);
     var contentEl = $(this).parent().parent().find('.content');
     if(this.dataset.collapsed){
       delete this.dataset.collapsed;
