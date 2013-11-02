@@ -32,13 +32,13 @@ window.addEventListener('load', function(){
     document.body.appendChild(script);
   });
   script.addEventListener('load', function(){
-    setTimeout(function(){
+    var init = function(){
       if(window.SyntaxHighlighter){
         //SyntaxHighlighter.config.bloggerMode = true;
         SyntaxHighlighter.all();
-      }
-    }, 500);
+      }else
+        setTimeout(init, 1000);
+    };
+    setTimeout(init, 500);
   });
-  var widgets = $('.sidebar .widget.AdSense');
-  widgets.css('position', 'fixed');
 });
