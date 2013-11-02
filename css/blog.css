@@ -33,3 +33,12 @@ code.bash, .console-output{
   background: rgb(83, 128, 177);
   color: white;
 }
+
+blockquote{
+  text-align: right;
+  font-style: italic;
+}
+
+.line code{
+  display: inline-block;
+}
