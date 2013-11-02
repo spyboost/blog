@@ -7,22 +7,6 @@
   <link rel="stylesheet" href="http://spyboost.github.io/blog/css/blog.css" />
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
   <script src="http://spyboost.github.io/blog/js/blog.js"></script>
-  <script>
-    $(document).ready(function(){
-      var scriptSrcPrefix = 'http://spyboost.github.io/blog/syntax/';
-      var script = undefined;
-      ['scripts/shCore.js', 'scripts/shBrushJava.js'].forEach(function(v){
-        var fullUrl = scriptSrcPrefix + v;
-        script = document.createElement('script');
-        script.src = fullUrl;
-        document.body.appendChild(script);
-      });
-      script.addEventListener('load', function(){
-        //SyntaxHighlighter.config.bloggerMode = true;
-        SyntaxHighlighter.all();
-      });
-    });
-  </script>
 </head>
 <body>
 <h1>Introduction</h1>
@@ -219,7 +203,7 @@ Create the file called <b>HelloWorld.java</b> and write your first Java program 
       </li>
     </ul>
   </li>
-  <li>Every instruction in java code has to be terminated with semicolon <b>;</b>
+  <li>Every statement (instruction) in java code has to be terminated with semicolon <b>;</b>
     <ul>
       <li>That's why we have semicolon after System.out.println("Hello world")<b>;</b></li>
     </ul>
@@ -237,7 +221,7 @@ Create the file called <b>HelloWorld.java</b> and write your first Java program 
       <li>That's why whe open code block at line 1 and close it at line 5</li>
     </ul>
   </li>
-  <li>Java expects us to put our instructions int the code block defined after <b>public static void main(String[] args)</b>
+  <li>Java expects us to put our statements in the code block defined after <b>public static void main(String[] args)</b>
     <ul>
       <li>That's why we have
         <div class="file java">
@@ -333,6 +317,23 @@ compiled again our source file HelloWorld.java, <b>javac</b> updated HelloWorld.
   <ol>
     <li>Create a java program that prints "I know Java!" text in the console. Name the source file IKnowJava.java</li>
   </ol>
+  <p>The solutions to exercises will be shown in the next consecutive chapter. You can comment your exercise solution in the comments. I'll review it and follow up with you regarding
+  any errors.</p>
+</section>
+<section id="conclusion">
+  <p>In this introduction we learned how to write simple java program. Even though it was very simple and printed text lines in the console, we learned a lot of details
+    and steps involved into writing all java programs of any complexity.
+  </p>
+  <p>Our dictionary is now expanded with new words:</p>
+  <ul>
+    <li><b>source file</b> - the .java file with human readable program text</li>
+    <li><b>javac</b> - java <b>c</b>ompiler - compiles java source and creates a .class file</li>
+    <li><b>java</b> - runs the java program</li>
+    <li><b>code block</b> - everything between curly braces <b>{}</b></li>
+    <li><b>statement</b> - the instruction to a computer do some work</li>
+    <li><b>;</b> - semicolon - multiple instructions are separated by the semicolon</li>
+  </ul>
+  In the next tutorial we'll learn how to write more sophisticated programs and do basic operations with numbers.
 </section>
 </body>
 </html>
