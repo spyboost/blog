@@ -41,5 +41,4 @@ window.addEventListener('load', function(){
   });
   var widgets = $('.sidebar .widget.AdSense');
   widgets.css('position', 'fixed');
-
 });
