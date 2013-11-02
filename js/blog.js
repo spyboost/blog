@@ -21,24 +21,10 @@ window.addEventListener('load', function(){
       clickElement.addEventListener('click', clickElementClickHandler);
     }
   })();
-
-
-  var scriptSrcPrefix = 'http://spyboost.github.io/blog/syntax/';
-  var script = undefined;
-  ['scripts/shCore.js', 'scripts/shBrushJava.js'].forEach(function(v){
-    var fullUrl = scriptSrcPrefix + v;
-    script = document.createElement('script');
-    script.src = fullUrl;
-    document.body.appendChild(script);
-  });
-  script.addEventListener('load', function(){
-    var init = function(){
-      if(window.SyntaxHighlighter){
-        //SyntaxHighlighter.config.bloggerMode = true;
-        SyntaxHighlighter.all();
-      }else
-        setTimeout(init, 1000);
-    };
-    setTimeout(init, 500);
-  });
 });
+window.Blog = {
+  syntax: function(){
+    //SyntaxHighlighter.config.bloggerMode = true;
+    SyntaxHighlighter.all();
+  }
+};
