@@ -1,31 +1,26 @@
 <!doctype html>
 <html>
 <head>
-  <style>
-    .redd {
-      color: red
-    }
-  </style>
-  <script>
-    var el = document.querySelector('#redd');
-    console.log(el);
-  </script>
+  <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css"/>
+  <link rel="stylesheet" href="http://spyboost.github.io/blog/css/blog.css" />
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+  <script src="http://spyboost.github.io/blog/js/blog.js"></script>
 </head>
 <body>
-<div dir="ltr" style="text-align: left;" trbidi="on">
   <article>
     <header>
-      <h3>
+      <h3 itemprop="name headline">
         Atmosphere and AngularJS
       </h3>
     </header>
+  <div dir="ltr" style="text-align: left;" trbidi="on">
     <section id="intro">
       <a href="https://github.com/Atmosphere/atmosphere" target="_blank">Atmosphere framework</a>
       is the The Asynchronous WebSocket/Comet Framework for building asynchronous web applications.
       What makes it outstanding among similar frameworks is that:
       <ul>
         <li>Atmosphere is supported by the plethora of existing web frameworks either natively or via plugins.</li>
-        <li>Atmosphere works on all Servlet based servers including Tomcat, JBoss Jetty, Resin, GlassFish, Undertow, WebSphere, WebLogic etc. Not running a Servlet Container? Netty Play! Framework or Vert.x</li>
+        <li>Atmosphere works on all Servlet based servers including Tomcat, JBoss Jetty, Resin, GlassFish, Undertow, WebSphere, WebLogic etc. Not running a Servlet Container? Netty, Play! Framework or Vert.x</li>
         <li>Atmosphere transparently supports WebSockets, Server Side Events (SSE), Long-Polling, HTTP Streaming (Forever frame) and JSONP.</li>
         <li>Atmosphere provides nice javascript library that handles WebSocket communication and falls back to long-polling transparently.</li>
       </ul>
@@ -33,21 +28,863 @@
       There's no need to think about WebSocket support or hardcode specific vendor implementations.
       <p>Sounds too good to be true, doesn't it? Let me show you that it is true, indeed.</p>
     </section>
-
+    <section id="overview">
+      <p>The tutorial is based on the excellent example from the Atmosphere examples project and modified to use AngularJS for the front end.</p>
+      <p>The code and tutorial cover the following workflow:</p>
+      <ol id="workflow">
+        <li>User opens Chat web page url in the browser (running on localhost)</li>
+        <li>User enters the name</li>
+        <li>User sends messages to the chat.
+          <ul>
+            <li>User sees his/her own message.</li>
+            <li>If there's nobody else in the chat, User opens another browser tab or window and proceeds to the step 1.</li>
+            <li>Otherwise, both users see the messages being send</li>
+          </ul>
+        </li>
+      </ol>
+      <p>While this sounds like a simple and easy thing to do, you should remember that every time it comes to the coding, all simple things exponentially grow in complexity.
+        Let's analyze requirement more thoroughly.
+      </p>
+      <ul>
+        <li>There must be a front-end allowing user to submit the name.</li>
+        <li>There must be a way to connect and listen for the incoming messages asynchronously from the front end.</li>
+        <li>The server must asynchronously process incoming chat messages and notify all users in the chat.</li>
+      </ul>
+      <p>As it will become clear after completion of this tutorial, Atmospheres framework makes it incredibly easy to deal with the server side asynchronous processing.
+        You'll find that most of time you are spending building nice front-ends instead of dealing with complexities of asynchronous request processing.
+      </p>
+    </section>
     <section id="prerequisites">
       <header><h3>Prerequisites</h3></header>
-      <p>The source code for this tutorial: <a href="https://github.com/spyboost/atmosphere-chat-angular" target="_blank">https://github.com/spyboost/atmosphere-chat-angular</a></p>
+      <p>The source code for this tutorial can be explored at <a href="https://github.com/spyboost/atmosphere-chat-angular" target="_blank">https://github.com/spyboost/atmosphere-chat-angular</a></p>
       <h4>This is what you need to have installed</h4>
       <ul>
         <li>Java: http://www.oracle.com/technetwork/java/javase/downloads/index.html</li>
         <li>Maven: http://maven.apache.org/download.cgi</li>
-        <li>Git (if you want to clone the code repository)</li>
+        <li>Git (if you want to <a href="#clone">clone</a> the code repository and run it instead of accomplishing the <a href="#mvn">step-by-step</a> guide)</li>
+      </ul>
+    </section>
+    <p>If you want to build the application step by step click and read <a href="#mvn">step-by-step</a> section. Otherwise, keep reading next section.</p>
+    <section id="clone">
+      <header><h3>Clone and run the code</h3></header>
+      <p>Clone the code from the repository:</p>
+      <code class="bash">
+        git clone git@github.com:spyboost/atmosphere-chat-angular.git
+      </code>
+      <p>And the output should be similar to this:</p>
+      <div class="console-output">
+        <pre>Cloning into 'atmosphere-chat-angular'...
+remote: Counting objects: 55, done.
+remote: Compressing objects: 100% (25/25), done.
+remote: Total 55 (delta 7), reused 50 (delta 7)
+Receiving objects: 100% (55/55), 13.72 KiB, done.
+Resolving deltas: 100% (7/7), done.</pre>
+      </div>
+      <p id="jetty:run">Now run the embedded jetty server</p>
+      <code class="bash">
+        cd atmosphere-chat-angular
+      </code>
+      <p>And run the embedded jetty maven goal</p>
+      <code class="bash">
+        mvn jetty:run
+      </code>
+      <p>The console logs should start fill in and when the Jetty is ready to serve requests you should see the logs:</p>
+      <div class="console-output">
+        <pre>2013-10-19 18:13:00.589:INFO:oejs.ServerConnector:main: Started ServerConnector@6b8dc72c{HTTP/1.1}{0.0.0.0:8080}
+[INFO] Started Jetty Server
+[INFO] Starting scanner at interval of 1 seconds.</pre>
+      </div>
+      <p>Now open the browser <a href="http://localhost:8080" target="_blank">localhost:8080</a> and play around with the project. The <a href="#workflow">workflow</a> should help explore it better.</p>
+    </section>
+    <section id="mvn">
+      <header><h3>Step by step</h3></header>
+      <p>Open command line and type this command</p>
+      <code class="bash">
+        mvn archetype:generate -DgroupId=org.atmosphere.samples.chat.angular -DartifactId=atmosphere-chat-angular -DarchetypeArtifactId=maven-archetype-webapp -DinteractiveMode=false
+      </code>
+      <p>If the command executed successfully, you should see this output in the end:</p>
+      <div class="console-output">
+        <pre>[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------</pre>
+      </div>
+      <p>
+        This command generates a new maven web project. You should see this directory tree:
+      </p>
+      <div class="console-output">
+          <pre>
+atmosphere-chat-angular
+|- src
+  |- main
+     |+ resources
+     |- webapp
+       |- WEB-INF
+          |- web.xml
+       |- index.jsp
+|- pom.xml
+          </pre>
+      </div>
+      <p>We don't need index.jsp, so let's remove it:</p>
+      <code class="bash">
+        rm atmosphere-chat-angular<span class="path-separator"></span>src<span class="path-separator"></span>main<span class="path-separator"></span>webapp<span class="path-separator"></span>index.jsp
+      </code>
+    </section>
+    <section id="pom.xml">
+      <p>Let's add all dependencies to our project. Open atmosphere-chat-angular<span class="path-separator"></span>pom.xml and modify it:</p>
+      <div class="file">
+        <div class="name">atmosphere-chat-angular<span class="path-separator"></span>pom.xml</div>
+        <div>
+          <div class="content xml">
+            <pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;
+         xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+         xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/maven-v4_0_0.xsd&quot;&gt;
+  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+  &lt;groupId&gt;org.atmosphere.samples&lt;/groupId&gt;
+  &lt;artifactId&gt;atmosphere-chat-angular&lt;/artifactId&gt;
+  &lt;packaging&gt;war&lt;/packaging&gt;
+  &lt;name&gt;atmosphere-chat-angular&lt;/name&gt;
+  &lt;url&gt;http://maven.apache.org&lt;/url&gt;
+  &lt;version&gt;1.0.0-SNAPSHOT&lt;/version&gt;
+
+  &lt;properties&gt;
+    &lt;atmosphere-version&gt;[2, )&lt;/atmosphere-version&gt;
+    &lt;client-version&gt;[2.0.5, )&lt;/client-version&gt;
+    &lt;logback-version&gt;[1, )&lt;/logback-version&gt;
+    &lt;jetty-version&gt;9.0.6.v20130930&lt;/jetty-version&gt;
+  &lt;/properties&gt;
+
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.atmosphere&lt;/groupId&gt;
+      &lt;artifactId&gt;atmosphere-runtime&lt;/artifactId&gt;
+      &lt;version&gt;${atmosphere-version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.atmosphere.client&lt;/groupId&gt;
+      &lt;artifactId&gt;javascript&lt;/artifactId&gt;
+      &lt;version&gt;${client-version}&lt;/version&gt;
+      &lt;type&gt;war&lt;/type&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;ch.qos.logback&lt;/groupId&gt;
+      &lt;artifactId&gt;logback-classic&lt;/artifactId&gt;
+      &lt;version&gt;${logback-version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;ch.qos.logback&lt;/groupId&gt;
+      &lt;artifactId&gt;logback-core&lt;/artifactId&gt;
+      &lt;version&gt;${logback-version}&lt;/version&gt;
+    &lt;/dependency&gt;
+      &lt;dependency&gt;
+      &lt;groupId&gt;org.codehaus.jackson&lt;/groupId&gt;
+      &lt;artifactId&gt;jackson-mapper-asl&lt;/artifactId&gt;
+      &lt;version&gt;[1, )&lt;/version&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+
+  &lt;build&gt;
+    &lt;plugins&gt;
+      &lt;plugin&gt;
+        &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
+        &lt;version&gt;2.3.2&lt;/version&gt;
+        &lt;configuration&gt;
+        &lt;source&gt;1.7&lt;/source&gt;
+        &lt;target&gt;1.7&lt;/target&gt;
+        &lt;/configuration&gt;
+      &lt;/plugin&gt;
+      &lt;plugin&gt;
+        &lt;groupId&gt;org.eclipse.jetty&lt;/groupId&gt;
+        &lt;artifactId&gt;jetty-maven-plugin&lt;/artifactId&gt;
+        &lt;version&gt;${jetty-version}&lt;/version&gt;
+      &lt;/plugin&gt;
+    &lt;/plugins&gt;
+  &lt;/build&gt;
+&lt;/project&gt;</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="web.xml">
+      <p>Unfortunately, the maven-archetype-webapp is not up to date with the Servlet 3.0 specification and generates outdated 2.5 web.xml. Let's change that.</p>
+      <p>Open atmosphere-chat-angular<span class="path-separator"></span>src<span class="path-separator"></span>main<span class="path-separator"></span>webapp<span class="path-separator"></span>WEB-INF<span class="path-separator"></span>web.xml and modify it to look like this:</p>
+      <div class="file">
+        <div class="name">
+          atmosphere-chat-angular<span class="path-separator"></span>src<span class="path-separator"></span>main<span class="path-separator"></span>webapp<span class="path-separator"></span>WEB-INF<span class="path-separator"></span>web.xml
+        </div>
+        <div>
+          <div class="content xml">
+            <pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;web-app xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xsi:schemaLocation=&quot;http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd&quot;
+    version=&quot;3.0&quot;&gt;
+  &lt;servlet&gt;
+      &lt;servlet-name&gt;AtmosphereServlet&lt;/servlet-name&gt;
+      &lt;servlet-class&gt;org.atmosphere.cpr.AtmosphereServlet&lt;/servlet-class&gt;
+      &lt;load-on-startup&gt;0&lt;/load-on-startup&gt;
+      &lt;async-supported&gt;true&lt;/async-supported&gt;
+  &lt;/servlet&gt;
+  &lt;servlet-mapping&gt;
+      &lt;servlet-name&gt;AtmosphereServlet&lt;/servlet-name&gt;
+      &lt;url-pattern&gt;/chat/*&lt;/url-pattern&gt;
+      &lt;/servlet-mapping&gt;
+&lt;/web-app&gt;</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="code">
+      <header><h4>Code, sweet code</h4></header>
+      <p>Now we're going to write some java code. Finally! I know you've been eagerly waiting for diving into some real stuff.</p>
+      <p>We'll learn how Atmosphere registers url handlers and manages connection lifecycle.</p>
+      <p>
+        The project that we generated with Maven archetype has folders only with static web application files. We have to create folders manually following Maven convention.
+        Create this path:
+        <code class="bash">
+          atmosphere-chat-angular<span class="path-separator"></span>src<span class="path-separator"></span>main<span class="path-separator"></span>java
+        </code>
+      </p>
+      <p>Now lets' start with java classes. First, let's create the ChatMessage class which will be used to send messages from users:</p>
+      <div class="file" id="ChatMessage.java">
+        <div class="name">
+          atmosphere-chat-angular<span class="path-separator"></span>src<span class="path-separator"></span>main<span class="path-separator"></span>java<span class="path-separator"></span>ChatMessage.java
+        </div>
+        <div>
+          <div class="content java">
+            <pre><code>package org.atmosphere.samples.chat.angular;
+
+import java.util.Date;
+
+public final class ChatMessage{
+    private String message;
+    private String author;
+    private long time;
+
+    public ChatMessage(){
+        this("", "");
+    }
+
+    public ChatMessage(String author, String message){
+        this.author = author;
+        this.message = message;
+        this.time = new Date().getTime();
+    }
+
+    public String getMessage(){
+        return message;
+    }
+
+    public String getAuthor(){
+        return author;
+    }
+
+    public void setAuthor(String author){
+        this.author = author;
+    }
+
+    public void setMessage(String message){
+        this.message = message;
+    }
+
+    public long getTime(){
+        return time;
+    }
+
+    public void setTime(long time){
+        this.time = time;
+    }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+      <p>So now we have ChatMessage class which encapsulates message details. It's very simple but we don't need complexity, do we?</p>
+      <p>Atmosphere framework uses encoder/decoder pattern to send and receive data.
+        Encoders are used to encode the data and send over the wire.
+        Decoders are used to convert the incoming data into a java class.
+        Pretty simple concept, but we'll see how powerful and easy to configure and use it is. Like everything in Atmosphere framework.</p>
+      <p>Even though technically encoders and decoders have separate responsibilities, logically it makes sense to encapsulate the behaviour in one implementation as it deals with one class.</p>
+      <p>Let's create our encoder and decoder implementation for ChatMessage class and call it ChatMessageEncoderDecoder:</p>
+      <div class="file java" id="ChatMessageEncoderDecoder.java">
+        <div class="name">
+          atmosphere-chat-angular<span class="path-separator"></span>src<span class="path-separator"></span>main<span class="path-separator"></span>java<span class="path-separator"></span>ChatMessageEncoderDecoder.java
+        </div>
+        <div>
+          <div class="content">
+            <pre><code>package org.atmosphere.samples.chat.angular;
+
+import org.atmosphere.config.managed.Decoder;
+import org.atmosphere.config.managed.Encoder;
+import org.codehaus.jackson.map.ObjectMapper;
+
+import java.io.IOException;
+
+public final class ChatMessageEncoderDecoder implements Encoder&lt;ChatMessage, String&gt;, Decoder&lt;String, ChatMessage&gt;{
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    @Override
+    public ChatMessage decode(final String s){
+        try{
+            return mapper.readValue(s, ChatMessage.class);
+        }catch(IOException e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public String encode(final ChatMessage message){
+        try{
+            return mapper.writeValueAsString(message);
+        }catch(IOException e){
+            throw new RuntimeException(e);
+        }
+    }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+      <p>Let's take a look at the file and understand the details. The first thing that should be noted is how generics improve code readability.</p>
+      <p><b>Encoder&lt;ChatMessage, String&gt;</b> means that we're encoding from ChatMessage into String.</p>
+      <p><b>Decoder&lt;String, ChatMessage&gt;</b> means that we're decoding from String into ChatMessage.</p>
+      <p>
+        While it's possible to encode into and decode from any arbitrary type, and string format in particular, our ChatMessageEncoderDecoder implementation delegates all work to the <b>ObjectMapper</b>.
+        ObjectMapper in turn transform our chat message into JSON.
+      </p>
+      <p>And now the final and the most interesting piece. The request handler that will asynchronously handle all incoming requests and respond with plain vanilla JSON using encoder/decoder</p>
+      <div class="file java" id="Chat.java">
+        <div class="name">
+          atmosphere-chat-angular<span class="path-separator"></span>src<span class="path-separator"></span>main<span class="path-separator"></span>java<span class="path-separator"></span>Chat.java
+        </div>
+        <div>
+          <div class="content">
+            <pre><code>package org.atmosphere.samples.chat.angular;
+
+import org.atmosphere.config.service.Disconnect;
+import org.atmosphere.config.service.ManagedService;
+import org.atmosphere.config.service.Message;
+import org.atmosphere.config.service.Ready;
+import org.atmosphere.cpr.AtmosphereResource;
+import org.atmosphere.cpr.AtmosphereResourceEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+
+/**
+ * Simple annotated class that demonstrate the power of Atmosphere.
+ * This class supports all transports, support message length guarantee,
+ * heart beat, message cache thanks to the @ManagedService.
+ */
+@ManagedService(path = "/chat")
+public final class Chat{
+    private static final Logger logger = LoggerFactory.getLogger(Chat.class);
+
+    /**
+     * Invoked when the connection as been fully established and suspended, e.g ready for receiving messages.
+     *
+     * @param r the atmosphere resource
+     */
+    @Ready
+    public final void onReady(final AtmosphereResource r){
+        logger.info("Browser {} connected.", r.uuid());
+    }
+
+    /**
+     * Invoked when the client disconnect or when an unexpected closing of the underlying connection happens.
+     *
+     * @param event the event
+     */
+    @Disconnect
+    public final void onDisconnect(final AtmosphereResourceEvent event){
+        if(event.isCancelled())
+            logger.info("Browser {} unexpectedly disconnected", event.getResource().uuid());
+        else if(event.isClosedByClient())
+            logger.info("Browser {} closed the connection", event.getResource().uuid());
+    }
+
+    /**
+     * Simple annotated class that demonstrate how
+     * {@link org.atmosphere.config.managed.Encoder} and {@link org.atmosphere.config.managed.Decoder
+     * can be used.
+     *
+     * @param message an instance of {@link ChatMessage }
+     * @return the chat message
+     * @throws IOException
+     */
+    @Message(encoders = {ChatMessageEncoderDecoder.class}, decoders = {ChatMessageEncoderDecoder.class})
+    public final ChatMessage onMessage(final ChatMessage message) throws IOException{
+        logger.info("{} just send {}", message.getAuthor(), message.getMessage());
+        return message;
+    }
+
+}</code></pre>
+          </div>
+        </div>
+      </div>
+      <p>Even briefly looking at the Chat.java reveals how easy it is to set a request handler in Atmosphere.</p>
+      <p><b>@ManagedService(path = "/chat")</b> means that Chat listens to the requests on /chat uri.
+        We'll see the details on how to send requests from client side in the <a href="#code_client">Client side</a> code section. But, in essence, it's as easy as just calling
+        <code>atmosphere.subscribe({url: '/chat'});</code> Atmosphere client side utility will take care of setting appropriate headers and request parameters and initiate WebSocket connection,
+        if the browser supports it, otherwise falling back to long-polling. The code doesn't have to change at all.
+      </p>
+      <p>
+        <b>@Ready</b> annotated method onReady is called when the connection is fully established and the Chat controller is ready to communicate with the client.
+        In our example, the communication is sending and receiving chat messages.
+      </p>
+      <p>
+        <b>@Message</b> annotated method onMessage is invoked when client sends chat messages. As we're living in the web world, the client sends data in plain text, though using JSON format.
+        This is where our encoder and decoder <a href="#ChatMessageEncoderDecoder.java">ChatMessageEncoderDecoder</a> steps into the scene. @Message annotation accepts 2 arguments:
+        encoders and decoders. In our example we use same class for encoding and decoding messages, but in more complex applications there can be many encoders and decoders which may satisfy
+        any requirement for message formats. For example, we could create Google protocol buffers encoder and decoder and our chat would convert messages to the new format while
+        the code and logic in application would remain unchanged.
+        <br />
+        The incoming request is being parsed by the decoder and JSON request payload gets converted into a ChatMessage instance and this ChatMessage instance is how the <b>message</b> argument
+        is passed to onMessage(final ChatMessage <b>message</b>) method call.
+        When the server replies, returning from the onMessage method, the encoder is used to encode the method return value into a String and send data back to the client.
+        In our example the method returns ChatMessage too, thus our encoder converts a String into a ChatMessage. But the return value can be of any type,
+        not necessarily the same as the incoming parameter type.
+      </p>
+      <ul>
+        <li>Client (web browser) => sends request with JSON encoded string, for example, {"message": "What is the answer to life the universe and everything?", "author": "Deep Thought"}</li>
+        <li>Chat controller invokes onMessage() and finds out that it has to convert JSON string into a ChatMessage instance.</li>
+        <li>{"message": "What is the answer to life the universe and everything?", "author": "Deep Thought"} is passed to ChatMessageEncoderDecoder.decode() which constructs a new ChatMessage</li>
+        <li>ChatMessage message is passed as <b>message</b> parameter variable to the Chat.onMessage() and the method starts processing</li>
+        <li>When Chat.onMessage returns the result, which appears to be a ChatMessage instance too, Atmosphere framework looks at the configured encoders and finds out that ChatMessageEncoderDecoder.encode() has to be called</li>
+        <li>ChatMessageEncoderDecoder.encode(message) => produces a JSON string => JSON string gets transferred back to the client.</li>
+      </ul>
+      <p>Succinctly the request/response workflow can be represented like this</p>
+      <ul>
+        <li>Browser => sends JSON => ChatMessageEncoderDecoder.decode(JSON) => produces ChatMessage => Chat.onMessage(ChatMessage) is invoked</li>
+        <li>Chat.onMessage => returns ChatMessage => ChatMessageEncoderDecoder.encode(ChatMessage) => produces JSON => Atmosphere triggers a browser callback with JSON result</li>
+      </ul>
+      <p>Now we're getting to a very interesting moment of discovering how exactly Atmosphere triggers a browser callback with JSON result.</p>
+    </section>
+
+    <section id="code_client">
+      <header><h2>Client side code</h2></header>
+      <p>
+        Client side code of handing connections and asynchronous request/response processing is very simple with Atmosphere framework.
+        In fact, Atmosphere provides javascript library and the API via "atmosphere" global Window object which gets populated when the library is imported.
+      </p>
+      <p>Just add it to the header of the html file and you are all set:</p>
+      <pre><code class="html">&lt;script src="javascript/atmosphere.js"&gt;&lt;/script&gt;</code></pre>
+      <p>
+        The example of connecting to the Atmosphere server endpoint and registering a callback to receive messages.
+      </p>
+      <pre><code class="javascript">var request = {
+    url: '/chat',
+    contentType : 'application/json',
+    transport : 'websocket',
+    reconnectInterval : 5000,
+    enableXDR: true,
+    timeout : 60000
+  };
+
+//onMessage is triggered when Atmosphere server sends an asynchronous message to the browser.
+request.onMessage = function(response){
+  var responseBody = response.responseBody; //JSON string
+  var message = atmosphere.util.parseJSON(responseBody); you have your message object now. Use it.
+}
+
+var socket = atmosphereService.subscribe(request);
+//socket is used to push messages to the server.
+socket.push(atmosphere.util.stringifyJSON({author: 'Deep Thought', message: 'What is the answer to life the universe and everything?'}));
+      </code></pre>
+      <p>Atmosphere allows you to define these callbacks on your request object:</p>
+      <ul>
+        <li><b>onOpen</b> - called when the connection is opened</li>
+        <li><b>onMessage</b> - called when the server pushes data to the client</li>
+        <li><b>onClientTimeout</b> - called when the connection times out</li>
+        <li><b>onReopen</b> - called when the connection is being reopened</li>
+        <li><b>onClose</b> - called when the connection is closed</li>
+        <li><b>onError</b> - called when the communication error occurs</li>
+      </ul>
+      <p>
+        That would be almost it and we could jump into coding html and plain javascript but there's one caveat when we want to use AngularJS.
+        As you may know, AngularJS requires you to call $apply() function any time you deal with callbacks initiated outside Angular scope management life cycle.
+        And the Atmosphere callbacks is exactly these types of callbacks. What it means to us is that if we want to update model in the onMessage callback, for example, we have to either
+        wrap the whole onMessage function body in the $apply() or remember to call $scope.$apply(); when we're done with model updates. And this is not only for onMessage callback - the same
+        steps needs to be done in every callback we want to use, be it onOpen, onReopen, etc.
+      </p>
+      <p>So the example of the Angularized onMessage callback could be something like this:</p>
+      <pre><code class="javascript">request.onMessage(function(response){
+  $scope.$apply(function(){
+    $scope.model.message = atmosphere.util.parseJSON(response.responseBody);
+  });
+});</code></pre>
+      <p>While it looks like not a big deal, and essentially it is not, it can be error prone as it's easy to forget to embrace your method calls into $scope.$apply() and then spend precious moments of your life figuring out why model changes are not visible.</p>
+      <p>For this purpose, your faithful author created a simple javascript wrapper utility <a href="https://github.com/spyboost/angular-atmosphere" target="_blank">https://github.com/spyboost/angular-atmosphere</a></p>
+      <p>To make my and your (if you decide that this utility fits your needs) life easier, you can import it in your html like this:</p>
+      <code class="javascript">&lt;script src="http://spyboost.github.io/angular-atmosphere/service/angular-atmosphere-service.js"&gt;&lt;/script&gt;</code>
+      <p>This is served from <a href="http://pages.github.com" target="_blank">github pages</a> and is very fast due to github CDN capabilities.</p>
+      <p>OK, now I mentioned all font end prerequisites, libraries and design choices. Let's roll up sleeves and start coding front-end!</p>
+      <p>Take a look at the index.html file below. It is very small. It's only 52 lines of markup. I'm using <a href="http://getbootstrap.com/" target="_blank"> Twitter Bootstrap 3.0</a> to make my design not look lame, as it would have been if I did all styling myself.</p>
+      <p>
+        Create <b>atmosphere-chat-angular<span class="path-separator"></span>src<span class="path-separator"></span>main<span class="path-separator"></span>webapp<span class="path-separator"></span>index.html</b>
+        with the following content:
+      </p>
+
+      <div class="file html" id="index.html">
+        <div class="name">
+          atmosphere-chat-angular<span class="path-separator"></span>src<span class="path-separator"></span>main<span class="path-separator"></span>webapp<span class="path-separator"></span>index.html
+        </div>
+        <div class="content"><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Atmosphere Chat AngularJS&lt;/title&gt;
+  &lt;link rel=&quot;stylesheet&quot; href=&quot;http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css&quot;/&gt;
+  &lt;link rel=&quot;stylesheet&quot; href=&quot;css/chat.css&quot; /&gt;
+  &lt;script src=&quot;//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js&quot;&gt;&lt;/script&gt;
+  &lt;script src=&quot;//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js&quot;&gt;&lt;/script&gt;
+  &lt;script src=&quot;javascript/atmosphere.js&quot;&gt;&lt;/script&gt;
+  &lt;script src=&quot;//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js&quot;&gt;&lt;/script&gt;
+  &lt;script src=&quot;//spyboost.github.io/angular-atmosphere/service/angular-atmosphere-service.js&quot;&gt;&lt;/script&gt;
+  &lt;script src=&quot;javascript/application.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body data-ng-app=&quot;angular.atmosphere.chat&quot; data-ng-controller=&quot;ChatController&quot;&gt;
+&lt;div id=&quot;header&quot;&gt;
+  &lt;h3 data-ng-bind=&quot;model.header&quot; data-ng-init=&quot;model.header='Atmosphere Chat. Default transport is WebSocket, fallback is long-polling'&quot;&gt;&lt;/h3&gt;
+&lt;/div&gt;
+&lt;p data-ng-show=&quot;!model.connected&quot;&gt;Connecting...&lt;/p&gt;
+&lt;p&gt;{{model.content}}&lt;/p&gt;
+&lt;div class=&quot;container&quot;&gt;
+  &lt;div class=&quot;row&quot;&gt;
+    &lt;div class=&quot;panel panel-default&quot;&gt;
+      &lt;div class=&quot;panel-heading&quot;&gt;
+        &lt;h3 class=&quot;panel-title&quot;&gt;Chat room&lt;/h3&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;panel-body&quot;&gt;
+        &lt;div class=&quot;messages&quot;&gt;
+          &lt;p data-ng-repeat=&quot;message in model.messages&quot;&gt;
+            &lt;span class=&quot;time&quot;&gt;{{message.date | date:'shortDate'}} {{message.date|date:'shortTime'}}&lt;/span&gt;
+            &lt;span class=&quot;author&quot;&gt;{{message.author}}&lt;/span&gt; :
+            &lt;span class=&quot;text&quot;&gt;{{message.text}}&lt;/span&gt;
+          &lt;/p&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;span data-ng-show=&quot;!model.name&quot;&gt;Enter your name:&lt;/span&gt;
+  &lt;div data-ng-show=&quot;model.logged&quot;&gt;
+    &lt;span&gt;&lt;b&gt;{{model.name}}&lt;/b&gt; says:&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;form role=&quot;form&quot; class=&quot;form-horizontal&quot;&gt;
+    &lt;div class=&quot;form-group&quot;&gt;
+      &lt;div class=&quot;col-lg-9&quot;&gt;
+        &lt;input type=&quot;text&quot; class=&quot;form-control&quot; id=&quot;input&quot; data-ng-disabled=&quot;!model.connected&quot; x-webkit-speech/&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/form&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </div>
+      </div>
+
+      <p>This is the
+        atmosphere-chat-angular<span class="path-separator"></span>src<span class="path-separator"></span>main<span class="path-separator"></span>webapp<span class="path-separator"></span>css<span class="path-separator"></span>chat.css
+      </p>
+      <div class="file css" id="chat.css">
+        <div class="name">
+          atmosphere-chat-angular<span class="path-separator"></span>src<span class="path-separator"></span>main<span class="path-separator"></span>webapp<span class="path-separator"></span>css<span class="path-separator"></span>chat.css
+        </div>
+        <div class="content"><pre><code>.time {
+  color: lightgray;
+}
+
+.author {
+  font-weight: bold;
+}</code></pre>
+        </div>
+      </div>
+      <p>And finally, the last and definitely not the least but highly awaited part - the front end javascript application code:
+        atmosphere-chat-angular<span class="path-separator"></span>src<span class="path-separator"></span>main<span class="path-separator"></span>webapp<span class="path-separator"></span>javascript<span class="path-separator"></span>application.js
+      </p>
+      <div class="file javascript" id="application.js">
+        <div class="name">
+          atmosphere-chat-angular<span class="path-separator"></span>src<span class="path-separator"></span>main<span class="path-separator"></span>webapp<span class="path-separator"></span>javascript<span class="path-separator"></span>application.js
+        </div>
+        <div class="content"><pre><code>angular.module('angular.atmosphere.chat', ['angular.atmosphere']);
+
+function ChatController($scope, atmosphereService){
+  $scope.model = {
+    transport: 'websocket',
+    messages: []
+  };
+
+  var socket;
+
+  var request = {
+    url: '/chat',
+    contentType: 'application/json',
+    logLevel: 'debug',
+    transport: 'websocket',
+    trackMessageLength: true,
+    reconnectInterval: 5000,
+    enableXDR: true,
+    timeout: 60000
+  };
+
+  request.onOpen = function(response){
+    $scope.model.transport = response.transport;
+    $scope.model.connected = true;
+    $scope.model.content = 'Atmosphere connected using ' + response.transport;
+  };
+
+  request.onClientTimeout = function(response){
+    $scope.model.content = 'Client closed the connection after a timeout. Reconnecting in ' + request.reconnectInterval;
+    $scope.model.connected = false;
+    socket.push(atmosphere.util.stringifyJSON({ author: author, message: 'is inactive and closed the connection. Will reconnect in ' + request.reconnectInterval }));
+    setTimeout(function(){
+      socket = atmosphereService.subscribe(request);
+    }, request.reconnectInterval);
+  };
+
+  request.onReopen = function(response){
+    $scope.model.connected = true;
+    $scope.model.content = 'Atmosphere re-connected using ' + response.transport;
+  };
+
+  //For demonstration of how you can customize the fallbackTransport using the onTransportFailure function
+  request.onTransportFailure = function(errorMsg, request){
+    atmosphere.util.info(errorMsg);
+    request.fallbackTransport = 'long-polling';
+    $scope.model.header = 'Atmosphere Chat. Default transport is WebSocket, fallback is ' + request.fallbackTransport;
+  };
+
+  request.onMessage = function(response){
+    var responseText = response.responseBody;
+    try{
+      var message = atmosphere.util.parseJSON(responseText);
+      if(!$scope.model.logged && $scope.model.name)
+        $scope.model.logged = true;
+      else{
+        var date = typeof(message.time) === 'string' ? parseInt(message.time) : message.time;
+        $scope.model.messages.push({author: message.author, date: new Date(date), text: message.message});
+      }
+    }catch(e){
+      console.error("Error parsing JSON: ", responseText);
+      throw e;
+    }
+  };
+
+  request.onClose = function(response){
+    $scope.model.connected = false;
+    $scope.model.content = 'Server closed the connection after a timeout';
+    socket.push(atmosphere.util.stringifyJSON({ author: $scope.model.name, message: 'disconnecting' }));
+  };
+
+  request.onError = function(response){
+    $scope.model.content = "Sorry, but there's some problem with your socket or the server is down";
+    $scope.model.logged = false;
+  };
+
+  request.onReconnect = function(request, response){
+    $scope.model.content = 'Connection lost. Trying to reconnect ' + request.reconnectInterval;
+    $scope.model.connected = false;
+  };
+
+  socket = atmosphereService.subscribe(request);
+
+  var input = $('#input');
+  input.keydown(function(event){
+    var me = this;
+    var msg = $(me).val();
+    if(msg && msg.length > 0 && event.keyCode === 13){
+      $scope.$apply(function(){
+        // First message is always the author's name
+        if(!$scope.model.name)
+          $scope.model.name = msg;
+
+        socket.push(atmosphere.util.stringifyJSON({author: $scope.model.name, message: msg}));
+        $(me).val('');
+      });
+    }
+  });
+}</code></pre>
+        </div>
+      </div>
+      <p>That's the whole beauty of using AngularJS - you just update model and the UI get's updated via their cool bi-directional binding.</p>
+      <p>I hope the code is clean and easy to understand and you, my dear reader, can easily grasp all details. However, I'll go through some important points to make your life easier.</p>
+      <ul>
+        <li>
+          Under normal circumstances, Angular updates model instantaneously while you are typing into the text field. It's not desiserd behaviour in our scenario, that's why
+          I had to rely on my custom input handler to update the model only after the user hits Enter key:
+          <div class="file javascript snippet" id="application.js:85">
+            <div class="name">
+              atmosphere-chat-angular<span class="path-separator"></span>src<span class="path-separator"></span>main<span class="path-separator"></span>webapp<span class="path-separator"></span>javascript<span class="path-separator"></span>application.js:85
+            </div>
+            <div class="content">
+              <pre><code>var input = $('#input');
+input.keydown(function(event){
+  var me = this;
+  var msg = $(me).val();
+  if(msg && msg.length > 0 && event.keyCode === 13){
+    $scope.$apply(function(){
+      // First message is always the author's name
+      if(!$scope.model.name)
+        $scope.model.name = msg;
+
+      socket.push(atmosphere.util.stringifyJSON({author: $scope.model.name, message: msg}));
+      $(me).val('');
+    });
+  }
+});</code></pre>
+            </div>
+          </div>
+          <p>The code checks if the entered value is not empty and if it is and the Enter key was pressed, the code constucts and message object and sends it to the server with
+            <b>socket.push()</b> method call.
+          </p>
+        </li>
+        <li>
+          The rest of the code creates a request object with callbacks.
+          <p>
+            I'll briefly focus on the <b>request.onMessage</b> callback. Atmosphere triggers onMessage callback when the server pushes data to the client. Very important moment here is that this push
+            is asynchronous and the client doesn't initiate the specific request to get this response, i.e. the communication is initiated by the server which triggers onMessage callback on the client.
+            The benefits of this approach is that the data can be supplied on demand when it's ready removing network overhead of constantly pinging the server and checking if there are any updates.
+            The client silently sits and waits until the server notifies updates to it. Similarly to when you order your favourite pizza and just sit and wait until a delivery guy rings your bell.
+            You don't call every second to the pizza shop asking if the delivery guy moved forward, do you?
+            <br />
+            In the pizza example, ordering the pizza is creating the request object and calling <b>atmosphereService.subscribe(request);</b>
+            The delivery guy ringing your bell is the Atmosphere calling <b>socket.onMessage</b> callback. The time between ordering pizza and opening doors after the bell has rung is the useful time your program without distracting with update status requests.
+          </p>
+          <p>I'll leave the exercise for you, my dear reader, to review other callbacks and I hope they're simple and straightforward to understand.</p>
+        </li>
       </ul>
     </section>
 
-    <section>
-    </section>
+      <section>
+        <header><h3>Done</h3></header>
+        <p>Now you are all set. Done. You can run the project with instructions explained above in <a href="#jetty:run">mvn jetty:run</a> section.</p>
+      </section>
+
+      <section id="pom.xml_development">
+        <header><h3>Local development</h3></header>
+        <h4>Windows</h4>
+        <p>
+          If you are on Windows and would like to modify the code and see the results hot redeployed you'll have to do one trick. There's a bug in Windows that affects Jetty server explained in
+          <a href="http://www.eclipse.org/jetty/documentation/current/troubleshooting-locked-files-on-windows.html" target="_blank">Troubleshooting Locked Files on Windows</a> on the official Jetty site.
+          If you are curious as I were, you can read the details of the bug, but in short, when you run "mvn jetty:run" command and then want to update, for example, index.html file to see the
+          changes updated without restarting the Jetty server, on Windows you won't be able to do it, because Windows locks the static files that Jetty loads. One of the solutions is to
+          extract <b>webdefault.xml</b> from the Jetty distribution and change to <b>false</b> the value of <b>useFileMappedBuffer</b> parameter.
+        </p>
+        <p>I did it for you already and you can get the file here <a href="http://spyboost.github.io/blog/atmosphere-chat-angular/webdefault.xml" target="_blank">http://spyboost.github.io/blog/atmosphere-chat-angular/webdefault.xml</a></p>
+        <p>Save the <a href="http://spyboost.github.io/blog/atmosphere-chat-angular/webdefault.xml" target="_blank">http://spyboost.github.io/blog/atmosphere-chat-angular/webdefault.xml</a> into the project root atmosphere-chat-angular folder.</p>
+        <p>Now let's slightly modify our atmosphere-chat-angular<span class="path-separator"></span>pom.xml</p>
+        <div class="file">
+          <div class="name">
+            atmosphere-chat-angular<span class="path-separator"></span>pom.xml
+          </div>
+          <div>
+            <div class="content xml">
+              <pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;
+         xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+         xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/maven-v4_0_0.xsd&quot;&gt;
+  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+  &lt;groupId&gt;org.atmosphere.samples&lt;/groupId&gt;
+  &lt;artifactId&gt;atmosphere-chat-angular&lt;/artifactId&gt;
+  &lt;packaging&gt;war&lt;/packaging&gt;
+  &lt;name&gt;atmosphere-chat-angular&lt;/name&gt;
+  &lt;url&gt;http://maven.apache.org&lt;/url&gt;
+  &lt;version&gt;1.0.0-SNAPSHOT&lt;/version&gt;
+
+  &lt;properties&gt;
+    &lt;atmosphere-version&gt;[2, )&lt;/atmosphere-version&gt;
+    &lt;client-version&gt;[2.0.5, )&lt;/client-version&gt;
+    &lt;logback-version&gt;[1, )&lt;/logback-version&gt;
+    &lt;jetty-version&gt;9.0.6.v20130930&lt;/jetty-version&gt;
+  &lt;/properties&gt;
+
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.atmosphere&lt;/groupId&gt;
+      &lt;artifactId&gt;atmosphere-runtime&lt;/artifactId&gt;
+      &lt;version&gt;${atmosphere-version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.atmosphere.client&lt;/groupId&gt;
+      &lt;artifactId&gt;javascript&lt;/artifactId&gt;
+      &lt;version&gt;${client-version}&lt;/version&gt;
+      &lt;type&gt;war&lt;/type&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;ch.qos.logback&lt;/groupId&gt;
+      &lt;artifactId&gt;logback-classic&lt;/artifactId&gt;
+      &lt;version&gt;${logback-version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;ch.qos.logback&lt;/groupId&gt;
+      &lt;artifactId&gt;logback-core&lt;/artifactId&gt;
+      &lt;version&gt;${logback-version}&lt;/version&gt;
+    &lt;/dependency&gt;
+      &lt;dependency&gt;
+      &lt;groupId&gt;org.codehaus.jackson&lt;/groupId&gt;
+      &lt;artifactId&gt;jackson-mapper-asl&lt;/artifactId&gt;
+      &lt;version&gt;[1, )&lt;/version&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+
+  &lt;build&gt;
+    &lt;plugins&gt;
+      &lt;plugin&gt;
+        &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
+        &lt;version&gt;2.3.2&lt;/version&gt;
+        &lt;configuration&gt;
+        &lt;source&gt;1.7&lt;/source&gt;
+        &lt;target&gt;1.7&lt;/target&gt;
+        &lt;/configuration&gt;
+      &lt;/plugin&gt;
+      &lt;plugin&gt;
+        &lt;groupId&gt;org.eclipse.jetty&lt;/groupId&gt;
+        &lt;artifactId&gt;jetty-maven-plugin&lt;/artifactId&gt;
+        &lt;version&gt;${jetty-version}&lt;/version&gt;
+        &lt;configuration&gt;
+          &lt;scanIntervalSeconds&gt;1&lt;/scanIntervalSeconds&gt;
+        &lt;/configuration&gt;
+      &lt;/plugin&gt;
+    &lt;/plugins&gt;
+  &lt;/build&gt;
+  &lt;profiles&gt;
+    &lt;profile&gt;
+      &lt;id&gt;windows&lt;/id&gt;
+      &lt;activation&gt;
+        &lt;os&gt;
+          &lt;family&gt;Windows&lt;/family&gt;
+        &lt;/os&gt;
+      &lt;/activation&gt;
+      &lt;build&gt;
+        &lt;plugins&gt;
+          &lt;plugin&gt;
+            &lt;groupId&gt;org.eclipse.jetty&lt;/groupId&gt;
+            &lt;artifactId&gt;jetty-maven-plugin&lt;/artifactId&gt;
+            &lt;version&gt;${jetty-version}&lt;/version&gt;
+            &lt;configuration&gt;
+              &lt;webApp&gt;
+                &lt;defaultsDescriptor&gt;webdefault.xml&lt;/defaultsDescriptor&gt;
+              &lt;/webApp&gt;
+            &lt;/configuration&gt;
+          &lt;/plugin&gt;
+        &lt;/plugins&gt;
+      &lt;/build&gt;
+    &lt;/profile&gt;
+  &lt;/profiles&gt;
+&lt;/project&gt;</code></pre>
+            </div>
+          </div>
+        </div>
+        <p>As you can see, I just added <b>scanIntervalSeconds</b> parameter and added Windows profile to override the <b>defaultDescriptor</b></p>
+        <h4>Linux or Unix</h4>
+        <p>For lucky Linux or Unix users, the webdefault.xml trick is not required because these operating systems doesn't lock resources.</p>
+        <p>However, you still need to add <b>scanIntervalSeconds</b> parameter to your pom.xml (see example above) for Jetty to pick up and hot redeploy your changes made to class files.</p>
+      </section>
+    </div>
   </article>
-</div>
 </body>
 </html>

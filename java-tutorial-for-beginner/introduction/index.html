@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="http://agorbatchev.typepad.com/pub/sh/3_0_83/styles/shCore.css"/>
+  <link rel="stylesheet" href="http://alexgorbatchev.com/pub/sh/2.1.364/styles/shThemeDefault.css"/>
+  <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css"/>
+  <link rel="stylesheet" href="http://spyboost.github.io/blog/css/blog.css" />
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+  <script src="http://spyboost.github.io/blog/js/blog.js"></script>
+  <script>
+    $(document).ready(function(){
+      var version = '3.0.83'.split(/\./).join('_');
+      var scriptSrcPrefix = 'http://agorbatchev.typepad.com/pub/sh/' + version + '/';
+      var script = undefined;
+      ['styles/shCore.css', 'styles/shThemeDefault.css', 'scripts/shCore.js', 'scripts/shBrushJava.js'].forEach(function(v){
+        var extension = v.split(/\./)[1];
+        var fullUrl = scriptSrcPrefix + v;
+        var el;
+        if(extension === 'js'){
+          script = document.createElement('script');
+          script.src = fullUrl;
+          el = script;
+        }else{
+          var link = document.createElement('link');
+          link.href = fullUrl;
+          el = link;
+        }
+        document.body.appendChild(el);
+      });
+      script.addEventListener('load', function(){
+        //SyntaxHighlighter.config.bloggerMode = true;
+        SyntaxHighlighter.all();
+      });
+    });
+  </script>
+  <style>
+    blockquote{
+      text-align: right;
+      font-style: italic;
+    }
+
+    .line code{
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+<h1>Introduction</h1>
+<p>This is the introduction into the series of articles about Java programming for beginners. I'll start with the assumption
+  that you, my dear reader, doesn't have any experience in Java or any other programming language. I'll be honest with you -
+  programming is not easy thing to do. But teaching programming is even harder because it requires not only trying to forget whatever I've learned so far myself to be as close as
+  possible to the state of mind of the person who has never seen a program before, but it also requires me to remember and make very clear and simple all the hardest things I had
+  problems with and spent sleepless nights figuring them out.
+</p>
+<p>
+  First, we'll start with installing the Java virtual machine on your computer. Second, we'll look at the code for our first and the simplest Java program.
+  During this introduction we'll make notes and remember the basic concepts about programming and writing programs.
+</p>
+<p>Let's start.</p>
+<h2>Programming languages concepts</h2>
+<p>There are many programming languages, so many that I can't even remember all of them from top of my head. Some are very easy to read. Some are very fast. But almost all of them
+  share some common features:
+</p>
+<ol>
+  <li>The program code is written is some sort of text files readable by humans.</li>
+  <li>The program code is transformed from the human readable format into the machine instructions that computers can understand.</li>
+  <li>The computer executes the transformed machine code step by step, instruction by instruction.</li>
+  <li>The program terminates when there's no more instructions left.</li>
+</ol>
+<p>You have to understand that the program is just the instructions you tell the computer to execute. There's no magic out there. The computers are not some smart creatures that know how
+to do things. The only thing computers know is how to move electrons at the very high frequencies. That's all. They don't know how to sum up numbers, how to draw images,
+how to print text. Computers only know how to execute very limited number of the commands which you, as the programmer, tell them to do. And they do it very fast. That's only reason
+computers exists - they can do very limited numbers of things very fast. So fast that we, humans, will never be able to do at that speed.
+</p>
+<p>So how do computers know how to connect to the Internet and display your lovely cat memes? Programs and programmers evolved. They became very sophisticated and capable to understand
+  and write instructions to connect to other computers and display pixels on the screen. But underneath, it's still same set of building blocks - very small and limited set of instructions
+  which every program consists of. These basic instructions are like atoms. Limited number of atoms form all known substances. So do basic instructions in programming languages.
+  The order of instructions you put into your program results in the program execution and the final result. These instructions can be put into right order and the program will produce
+  the expected result. Or they can be ordered in such a way that there will be unexpected errors. And this is where the programmer comes into the scene - to create the correct order of
+  instructions.
+</p>
+<h3 id="programming_thinking">Programming thinking</h3>
+<p>At this point you should realize that programs don't live in isolation. Indeed, each program starts with some idea or problem you want to solve. It's important to develop appropriate
+  programming thinking and look at every problem in terms of steps needed to accomplish the goal.
+</p>
+<ol id="programming_thinking_steps">
+  <li>Think thoroughly about the task or the problem.</li>
+  <li>Split the problem into granular steps and think about logical solution to each step, what you need to do to accomplish it.</li>
+  <li>When you understand the solution required, think about the code and mentally build the imaginary code in your mind. You don't have to be specific about
+    every instruction here. It's enough to understand <b>how</b> you want to program it.
+  </li>
+  <li>Once you know how to program it, start writing the code.</li>
+</ol>
+<p>For example, imagine that you know Java already (soon!) and the customer tells you to write the program which, when executed, prints "Hello world" on the screen and terminates.
+  That's simple, you may think. Of course, it is! When you know, everything becomes simple. It's another story, if you don't. Let's remember our
+  <a href="#programming_thinking_steps">programming thinking steps</a> and apply it here.
+</p>
+<ol>
+  <li>The problem is the program that has to print "Hello world" text on the screen every time it runs.</li>
+  <li>The major steps are:
+    <ul>
+      <li>There must be executable file that the customer will be able to run.
+        <ul>
+          <li>We have to know how to create an executable file in Java</li>
+          <li>We have to know how to run an executable file in Java</li>
+        </ul>
+      </li>
+      <li>The instructions of our executable file must print "Hello world" and terminate.
+        <ul>
+          <li>We have to know how to print text in Java program.</li>
+          <li>We have to know how to terminate the running Java program when the text has been print.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ol>
+<p>
+  This may sound like an overkill for this simple problem, but it helps to train your mental power from the beginning and then layer by layer you will find
+  how it helps you break down even the most complex problems to simple steps that you can chain together and deliver the outstanding result.
+</p>
+<blockquote>A journey of a thousand miles must begin with a single step.
+  <footer>Lao Tzu</footer>
+</blockquote>
+<p>Let's start addressing our problem step by step.</p>
+<h3>Java</h3>
+<p>In order to program and run Java programs, you have to download Java Development Kit (JDK). At the moment of writing you can get it here:
+  <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html" target="_blank">http://www.oracle.com/technetwork/java/javase/downloads/index.html</a>
+</p>
+<p>Note that you have to download JDK. Depending on the operating system, follow the specific instructions there. For Windows or MacOS users it's just a matter of running the installer.
+  For Linux users it's just a matter of unpacking the archive.</p>
+<h4>Making sure that Java installed properly</h4>
+<p>The simplest way to check if Java installed properly is to open command line prompt (terminal) and run this command:</p>
+<code class="bash">javac --version</code>
+<p>The result should be the current version of the JDK installed. So the command and the result should look like this:</p>
+<code class="bash">javac --version<br/>javac 1.7.0_45</code>
+<p>Now let's write the code.</p>
+<p>Create some folder where you want to store your projects and name it, for example, <b>projects</b>. Inside <b>projects</b> create another directory called <b>introduction</b>
+  and open it. So now you should be located at <b>projects<span class="path-separator"></span>introduction</b></p>
+Create the file called <b>HelloWorld.java</b> and write your first Java program step by step:
+<p>
+  Step 1
+</p>
+<div class="file java">
+  <div class="name">HelloWorld.java</div>
+  <div class="content"><pre class="brush:java">public class HelloWorld{}</pre>
+  </div>
+</div>
+<p>
+  Step 2
+</p>
+<div class="file java">
+  <div class="name">HelloWorld.java</div>
+  <div class="content"><pre class="brush:java">public class HelloWorld{
+    public static void main(String[] args){}
+}</pre>
+  </div>
+</div>
+<p>
+  Step 3
+</p>
+<div class="file java">
+  <div class="name">HelloWorld.java</div>
+  <div class="content"><pre class="brush:java">public class HelloWorld{
+    public static void main(String[] args){
+      System.out.println("Hello world");
+    }
+}</pre>
+  </div>
+</div>
+<p>
+  Open command line and navigate to <b>projects<span class="path-separator"></span>introduction</b>
+  <code class="bash">
+    cd <b>projects<span class="path-separator"></span>introduction</b>
+  </code>
+</p>
+<h4 id="compilation">Compilation</h4>
+<p>
+  Now execute this command
+  <code class="bash">
+    javac HelloWorld.java
+  </code>
+</p>
+<p>This command <b>compiled</b> our program. Just remember for now that computers can't just run your HelloWorld.java because it's a human readable text and is only for humans to
+  read and modify the code.
+  <br>
+  <b>javac</b> command translates this text into the instructions that Java will be able to run.
+</p>
+<p>
+  And now it's time to run our program. Run this command:
+  <code class="bash">
+    java HelloWorld
+  </code>
+</p>
+<p>The result of this command will be text <b>Hello world</b> printed on the new line: </p>
+<code class="bash">
+  java HelloWorld
+  <br>
+  Hello world
+</code>
+<p>Congratulations! You have just written you first Java program. I understand that there are a lot of uncertainties yet and you may not understand how it works.
+  The reality of being a programmer is that you spend a lot of time reading other people's code. Prepare to read a lot of code. That's why I started with the program code first
+  to let you start developing another super-hero ability of reading and understanding other people's minds looking at their code.
+  Let's dissect our first program and walk through line by line.
+</p>
+<p>First of all, let's take a look at line 3:</p>
+<div class="file java">
+  <div class="content">
+    <pre class="brush:java; gutter:false">System.out.println("Hello world");</pre>
+  </div>
+</div>
+<p>This code prints text <b>Hello world</b> on the screen. This is line of the code that is, essentially, accomplishes our goal and solves the task.
+  Why does it look like this and how do I know that the code has to be written this way?
+  For now just remember that in order to display a text on the screen you have to type System.out.println("Text you wand to display");
+</p>
+<p>I know you feel a little bit confused now, but remember when you were a kid and your parents told you that there are some things you'll understand only when you grow up?
+  When you were a kid, you didn't have a choice but just believe and remember a lot of things that parents tell you. You just accepted it as a fact. Later on, when you grow up, you understand a lot
+  of details. Same thing with learning programming or any other science - in the beginning you just accept and believe what teacher tells you. You were taught that division by zero
+  is prohibited. And you were fine with that. Then you discovered that it's actually allowed and you get infinity. But only when you were ready for that.
+</p>
+<p>I'll use same approach as teaching a kid. Just remember some things have to be done in a defined way in order for a program to work.</p>
+<p>First of all, look at our <b>HelloWorld</b>.java let's take a look at line 1 <i>public class</i> <b>HelloWorld</b> {</p>
+<ul>
+  <li>Every java program has to start with <i>public class </i> <b>Name of the file without .java</b> {</li>
+  <li>Every opening curly brace <b>{</b> has to be eventually matched with the corresponding closing curly brace <b>}</b>
+    <ul>
+      <li>That's why line 5 has <b>}</b> - the matching closing curly brace for <b>{</b> at line 1</li>
+    </ul>
+  </li>
+  <li>Every java program has to have <b>public static void main(String[] args) {</b> and the corresponding closing <b>}</b>
+    <ul>
+      <li>That's why line 4 has <b>}</b> which is the closing curly brace for the opening curly brace { at line 2</li>
+    </ul>
+  </li>
+  <li>
+    The actual code, which in our case is only 1 instruction to print the text on the screen, must be written between { and }
+    <ul>
+      <li>
+        That's why we have <b>System.out.println("Hello world");</b> on the line 3 and it's inside the curly braces block { } opened at line 2 and closed at line 4.
+      </li>
+    </ul>
+  </li>
+  <li>Every instruction in java code has to be terminated with semicolon <b>;</b>
+    <ul>
+      <li>That's why we have semicolon after System.out.println("Hello world")<b>;</b></li>
+    </ul>
+  </li>
+</ul>
+<p>And now let's briefly review it again</p>
+<ul>
+  <li>Our program file is called <b>HelloWorld</b>.java
+    <ul>
+      <li>That's why our code starts with <i>public class</i> <b>HelloWorld</b></li>
+    </ul>
+  </li>
+  <li>Opening and closing curly braces <b>{}</b> define a block of code where instructions has to be put at
+    <ul>
+      <li>That's why whe open code block at line 1 and close it at line 5</li>
+    </ul>
+  </li>
+  <li>Java expects us to put our instructions int the code block defined after <b>public static void main(String[] args)</b>
+    <ul>
+      <li>That's why we have
+        <div class="file java">
+          <div class="content">
+            <pre class="brush:java; gutter:false">public static void main(String[] args){
+  System.out.println("Hello world");
+}</pre>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </li>
+</ul>
+<p>Let's make some other experiments and you'll feel more comfortable with what's important to remember.</p>
+<p>Imagine that our specifications changed and we want to display 2 lines of text when we run our HelloWorld program</p>
+<code class="bash">
+  java HelloWorld
+  <br>
+  Hello world
+  <br>
+  My name is _YOUR NAME HERE_
+</code>
+<p>Let's quickly analyze what steps we have to do abstracting from the actual code:</p>
+<ul>
+  <li>We have to display the new line with text <b>My name is _YOUR NAME HERE_</b>, where _YOUR NAME HERE_ will be your actual name</li>
+  <li>We already know how to display a text with System.out.println("SOME TEXT"); instruction</li>
+  <li>Thus, we just need to add the new instruction to our existing program</li>
+</ul>
+<p>Open <b>HelloWorld.java</b> and modify it. Remember to change <b>Sergey</b> to your name :)</p>
+<div class="file java">
+  <div class="name">HelloWorld.java</div>
+  <div class="content"><pre class="brush:java">public class HelloWorld{
+    public static void main(String[] args){
+      System.out.println("Hello world");
+      System.out.println("My name is Sergey");
+    }
+}</pre>
+  </div>
+</div>
+<p>Looks great! But let's see if the changes will make any difference. Return to your command line and rerun the program:</p>
+<code class="bash">
+  java HelloWorld
+  <br>
+  Hello world
+</code>
+<p>Ugh. That's sad. The program doesn't print your name. And that's the point when you grow up and have to discover another truth about this world.</p>
+<p>Remeber the first step we did when we wrote our first program: <a href="#compilation">compilation</a>. That's where the truth is concealed - every time you modify your
+  <b>source file</b> HelloWorld.java, you have to compile it for changes to take into effect.
+</p>
+<p>Let's compile it.</p>
+<code class="bash">
+  javac HelloWorld.java
+</code>
+<p>And now run it</p>
+<code class="bash">
+  java HelloWorld
+  <br>
+  Hello world
+  <br>
+  My name is Sergey
+</code>
+<p>Great! Now your program works with the changes we make. Now you, my curious reader, should ask me, "But how does Java know if the code was compiled?".
+  That's a very good question.
+  <br>
+  And the answer to it is the <b>javac</b> command which compiles the code. This command creates a file <b>HelloWorld.class</b>
+</p>
+<p>If you look in the <b>projects<span class="path-separator"></span>introduction</b> directory, you'll see 2 files there:</p>
+<ul>
+  <li>HellWorld.java - the source file with our program text</li>
+  <li>HelloWorld.class - the file created by <b>javac</b> command</li>
+</ul>
+<p>And this reveals the last mystery - the understanding of <b>java</b> command. When you run</p>
+<code class="bash">
+  java HelloWorld
+</code>
+<p>
+<b>java</b> command looks for <i>HelloWorld</i><b>.class</b> file. If it finds it, it runs. If not, and error will be printed out to the console.
+</p>
+<p>When we modified our source file HelloWorld.java to print new line with your name, we didn't compile it with <b>javac</b> command and ran the program hoping it would print our name.
+But the HelloWorld.class file had old compiled code with only "Hello world" text in it. That's why <b>java</b> command printed only this line first time we ran it. After we
+compiled again our source file HelloWorld.java, <b>javac</b> updated HelloWorld.class file and after that <b>java</b> command was able to see the changes.
+<p>And this leads to the conclusion of the general process of writing java programs:</p>
+<ol>
+  <li>Create the .java source file, for example MyNewProgram.java/li>
+  <li>Write code in the source file</li>
+  <li>Compile the source file with <b>javac</b> command, for example javac MyNewProgram.java</li>
+  <li>The result of the <b>javac</b> command is a .class file, for example MyNewProgram.class</li>
+  <li>Run the program with <b>java</b> command, for example java MyNewProgram</li>
+  <li>If you want to make changes, repeat with step 2</li>
+</ol>
+</body>
+</html>
