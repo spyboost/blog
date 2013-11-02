@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="stylesheet" href="http://agorbatchev.typepad.com/pub/sh/3_0_83/styles/shCore.css"/>
-  <link rel="stylesheet" href="http://alexgorbatchev.com/pub/sh/2.1.364/styles/shThemeDefault.css"/>
   <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css"/>
+  <link rel="stylesheet" href="http://spyboost.github.io/blog/syntax/styles/shCore.css"/>
+  <link rel="stylesheet" href="http://spyboost.github.io/blog/syntax/styles/shThemeDefault.css"/>
   <link rel="stylesheet" href="http://spyboost.github.io/blog/css/blog.css" />
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
   <script src="http://spyboost.github.io/blog/js/blog.js"></script>
@@ -11,20 +11,11 @@
     $(document).ready(function(){
       var scriptSrcPrefix = 'http://spyboost.github.io/blog/syntax/';
       var script = undefined;
-      ['styles/shCore.css', 'styles/shThemeDefault.css', 'scripts/shCore.js', 'scripts/shBrushJava.js'].forEach(function(v){
-        var extension = v.split(/\./)[1];
+      ['scripts/shCore.js', 'scripts/shBrushJava.js'].forEach(function(v){
         var fullUrl = scriptSrcPrefix + v;
-        var el;
-        if(extension === 'js'){
-          script = document.createElement('script');
-          script.src = fullUrl;
-          el = script;
-        }else{
-          var link = document.createElement('link');
-          link.href = fullUrl;
-          el = link;
-        }
-        document.body.appendChild(el);
+        script = document.createElement('script');
+        script.src = fullUrl;
+        document.body.appendChild(script);
       });
       script.addEventListener('load', function(){
         //SyntaxHighlighter.config.bloggerMode = true;
@@ -32,16 +23,6 @@
       });
     });
   </script>
-  <style>
-    blockquote{
-      text-align: right;
-      font-style: italic;
-    }
-
-    .line code{
-      display: inline-block;
-    }
-  </style>
 </head>
 <body>
 <h1>Introduction</h1>
