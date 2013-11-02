@@ -22,9 +22,18 @@ window.addEventListener('load', function(){
     }
   })();
 });
-window.Blog = {
-  syntax: function(){
+$(document).ready(function(){
+  var scriptSrcPrefix = 'http://spyboost.github.io/blog/syntax/';
+  var script = undefined;
+  ['scripts/shCore.js', 'scripts/shBrushJava.js'].forEach(function(v){
+    var fullUrl = scriptSrcPrefix + v;
+    script = document.createElement('script');
+    script.src = fullUrl;
+    document.body.appendChild(script);
+  });
+
+  script.addEventListener('load', function(){
     //SyntaxHighlighter.config.bloggerMode = true;
     SyntaxHighlighter.all();
-  }
-};
+  });
+});

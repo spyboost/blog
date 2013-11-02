@@ -7,22 +7,6 @@
   <link rel="stylesheet" href="http://spyboost.github.io/blog/css/blog.css" />
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
   <script src="http://spyboost.github.io/blog/js/blog.js"></script>
-  <script>
-    $(document).ready(function(){
-      var scriptSrcPrefix = 'http://spyboost.github.io/blog/syntax/';
-      var script = undefined;
-      ['scripts/shCore.js', 'scripts/shBrushJava.js'].forEach(function(v){
-        var fullUrl = scriptSrcPrefix + v;
-        script = document.createElement('script');
-        script.src = fullUrl;
-        document.body.appendChild(script);
-      });
-
-      script.addEventListener('load', function(){
-        Blog.syntax();
-      });
-    });
-  </script>
 </head>
 <body>
 <h1>Introduction</h1>
